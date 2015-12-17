@@ -1,0 +1,25 @@
+#!/bin/bash
+clear
+rm -fr output
+rm -frv build
+make clean && make mrproper
+mkdir -pv build/out/modules/pronto build/out/dt_image output
+mkdir -pv build/system/etc/firmware/wlan/prima
+export ARCH=arm
+export CROSS_COMPILE=/opt/toolchains/arm-eabi-4.8-linaro/bin/arm-eabi-
+export STRIP=/opt/toolchains/arm-eabi-4.8-linaro/bin/arm-eabi-strip
+make -C $(pwd) O=output bottom-end-ole-533_defconfig
+make -C $(pwd) O=output
+./tools/dtbTool-533 -o build/out/dt_image/boot.img-dtb -2 -s 1024 -p ./output/scripts/dtc/ ./output/arch/arm/boot/dts/
+cp output/arch/arm/boot/*zImage build/out/boot.img-zImage
+cp drivers/staging/prima/firmware_bin/WCNSS_cfg.dat build/system/etc/firmware/wlan/prima/WCNSS_cfg.dat
+cp drivers/staging/prima/firmware_bin/WCNSS_qcom_cfg.ini build/system/etc/firmware/wlan/prima/WCNSS_qcom_cfg.ini
+cp drivers/staging/prima/firmware_bin/WCNSS_qcom_wlan_nv.bin build/system/etc/firmware/wlan/prima/WCNSS_qcom_wlan_nv.bin
+find -type f -name *.ko -exec cp {} build/out/modules/ \;
+ls -al build/out/modules/
+cd build/out/modules/
+$STRIP --strip-unneeded *.ko
+mv wlan.ko pronto/pronto_wlan.ko
+cd ../../../
+ls -al build/out/modules/ build/out/modules/pronto/ build/out/dt_image/ build/out/
+echo Done !

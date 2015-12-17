@@ -1,0 +1,13 @@
+#!/bin/bash
+export ARCH=arm
+export CROSS_COMPILE=/opt/toolchains/arm-eabi-4.8-linaro/bin/arm-eabi-
+export STRIP=/opt/toolchains/arm-eabi-4.8-linaro/bin/arm-eabi-strip
+rm -frv build
+make clean && make mrproper
+mkdir -pv build/modules build/dtimg
+make msm8916_sec_defconfig VARIANT_DEFCONFIG=msm8916_sec_matissevewifi_eur_defconfig SELINUX_DEFCONFIG=selinux_defconfig
+make menuconfig && wait
+cp .config arch/arm/configs/bottom-end-ole-533_defconfig
+rm -frv build
+make clean && make mrproper
+echo Done
